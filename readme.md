@@ -11,6 +11,8 @@ This is a script for porting all the Stripe data you care about into Xero as a b
 
 # Notes
 
+Requires ruby 1.9.
+
 This script doesn't really deal with refunds, and we only care about transfers which are final, not ones which are pending. Happy to take pull requests to deal with refunds better.
 
 The bank is hardcoded to be "US Bank" because that's my bank. You can likely create a rule to map transfers to whatever bank account you use.
