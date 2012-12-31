@@ -20,4 +20,3 @@ The bank name (default: `US Bank`) is configurable by changing the `bank_name` v
 # Future versions
 
 Might include the ability to upload to Xero directly, if I can figure out some way for them to let bots in. They don't support bank account transactions entered via the API, so I'd have to fake it somehow. Might use testacular, but you know, whatevs.
->>>>>>> Update to pull directly from Stripe. No more manual labor.
