@@ -1,12 +1,12 @@
-This is a script for porting all the Stripe data you care about into Xero as a bank statement, which means you can easily reconcile invoices, bank transfers, fees, etc.
+This is a script for porting all the Stripe data you care about into Xero as a bank statement, which means you can easily reconcile invoices, bank transfers, fees, etc. The script pulls directly from your Stripe account, with no messy intermediate steps.
 
 # Usage
 
-- Log into Stripe's [payments page][1], and click "export" in the upper right corner.
-- Head to Stripe's [transfers page][2], and again, click export in the upper right corner.
-- Copy said export files into the same directory as this script.
+- Either `bundle install` or `gem install stripe` to use the `Stripe` gem.
+- Enter your stripe secret key either as an environment variable, or copy and paste it directly into the script and uncomment the line where that happens.
 - Run the script `./stripe_to_xero.rb`
-- Upload `xero.csv` into a "Stripe" bank account.
+- Create a "Stripe" bank account on Xero, with manual bank feeds.
+- Upload `xero.csv` into "Stripe" bank account.
 - Reconcile away.
 
 # Notes
@@ -15,7 +15,9 @@ Requires ruby 1.9.
 
 This script doesn't really deal with refunds, and we only care about transfers which are final, not ones which are pending. Happy to take pull requests to deal with refunds better.
 
-The bank is hardcoded to be "US Bank" because that's my bank. You can likely create a rule to map transfers to whatever bank account you use.
+The bank name (default: `US Bank`) is configurable by changing the `bank_name` variable at the top of the script.
 
-[1]: https://manage.stripe.com/payments
-[2]: https://manage.stripe.com/transfers
+# Future versions
+
+Might include the ability to upload to Xero directly, if I can figure out some way for them to let bots in. They don't support bank account transactions entered via the API, so I'd have to fake it somehow. Might use testacular, but you know, whatevs.
+>>>>>>> Update to pull directly from Stripe. No more manual labor.
