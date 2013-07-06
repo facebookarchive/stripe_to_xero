@@ -11,8 +11,12 @@ charges = Stripe::Charge.all(count: 50)
 transfers = Stripe::Transfer.all(count: 50)
 
 def cents_to_dollars(value)
-  val = value.to_s[0..-3] + "." + value.to_s[-2..-1]
-  val.to_f
+  if value != 0
+    val = value.to_s[0..-3] + "." + value.to_s[-2..-1]
+    val.to_f
+  else
+    value
+  end
 end
 
 def xero_date(date_obj)
