@@ -3,20 +3,21 @@ This is a script for porting all the Stripe data you care about into Xero as a b
 # Usage
 
 - Either `bundle install` or `gem install stripe` to use the `Stripe` gem.
+- Install CasperJS if you'd like to automatically upload the results into Xero
 - Enter your stripe secret key either as an environment variable, or copy and paste it directly into the script and uncomment the line where that happens.
+- Enter your Xero credentials to enable auto upload
 - Run the script `./stripe_to_xero.rb`
 - Create a "Stripe" bank account on Xero, with manual bank feeds.
-- Upload `xero.csv` into "Stripe" bank account.
+- Upload `xero.csv` into "Stripe" bank account, or use our `auto_import.sh` script to make it happen automatically.
 - Reconcile away.
 
 # Notes
 
+We use `foreman` to easily set up environment variables. You might find it handy too.
+
 Requires ruby 1.9.
 
-This script doesn't really deal with refunds, and we only care about transfers which are final, not ones which are pending. Happy to take pull requests to deal with refunds better.
+Last time I checked, refunds were implemented lazily, so hopefully you don't need them. (Happy to take pull requests!)
 
-The bank name (default: `US Bank`) is configurable by changing the `bank_name` variable at the top of the script.
+The bank name for transfers (default: `US Bank`) is configurable by changing the `bank_name` variable at the top of the script.
 
-# Future versions
-
-Might include the ability to upload to Xero directly, if I can figure out some way for them to let bots in. They don't support bank account transactions entered via the API, so I'd have to fake it somehow. Might use testacular, but you know, whatevs.

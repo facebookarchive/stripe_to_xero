@@ -53,9 +53,10 @@ CSV.open('xero.csv', 'wb', row_sep: "\r\n") do |csv|
       amount = cents_to_dollars charge.amount
       reference = charge.id
       type = "Credit"
-      payee = Stripe::Customer.retrieve(charge.customer).email
+      customer = Stripe::Customer.retrieve(charge.customer)
+      payee = customer.email if customer.respond_to? :email
       
-      csv << [date,description,amount,reference,type,payee]
+      csv << [date,description,amount,reference,type,payee] if payee
     end
   end
   p transfers.first
