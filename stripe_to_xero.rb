@@ -6,8 +6,8 @@ require 'stripe'
 
 Stripe.api_key = ENV['STRIPE_SECRET']
 #Stripe.api_key = '' #Put your secret here and comment the line above if you're not sure about env vars.
-bank_name = "US Bank"
-count = 50
+bank_name = ENV['BANK_NAME'] || "US Bank"
+count = ENV['STX_COUNT'] || 50
 output_file = 'xero.csv'
 
 puts "gathering last #{count} charges"
