@@ -17,7 +17,8 @@ We use `foreman` to easily set up environment variables. You might find it handy
 
 Requires ruby 1.9.
 
-Last time I checked, refunds were implemented lazily, so hopefully you don't need them. (Happy to take pull requests!)
-
 The bank name for transfers (default: `US Bank`) is configurable by changing the `bank_name` variable at the top of the script.
 
+# Changelog
+
+v1 - Implements new refund calculation, adds better echoed text, uses Stripe's newish `expand` option to make 50 less API calls, and increase speed A LOT.

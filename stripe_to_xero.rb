@@ -1,14 +1,21 @@
 #!/usr/bin/env ruby
 
 require 'csv'
+require 'date'
 require 'stripe'
 
 Stripe.api_key = ENV['STRIPE_SECRET']
 #Stripe.api_key = '' #Put your secret here and comment the line above if you're not sure about env vars.
 bank_name = "US Bank"
+count = 50
+output_file = 'xero.csv'
 
-charges = Stripe::Charge.all(count: 50)
-transfers = Stripe::Transfer.all(count: 50)
+puts "gathering last #{count} charges"
+charges = Stripe::Charge.all(count: count, :expand => ['data.customer'])
+puts "done!"
+puts "gathering last #{count} transfers"
+transfers = Stripe::Transfer.all(count: count)
+puts "done"
 
 def cents_to_dollars(value)
   if value != 0
@@ -25,8 +32,8 @@ def xero_date(date_obj)
   end
   date = "#{date_obj.year}-#{"%02d" % date_obj.month}-#{"%02d" % date_obj.day}"
 end
-
-CSV.open('xero.csv', 'wb', row_sep: "\r\n") do |csv|
+puts "Writing xero.csv"
+CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   csv << ['Transaction Date','Description', 'Transaction Amount', 'Reference', 'Transaction Type', 'Payee']
   transfers.each do |transfer|
     if transfer.status == "paid"
@@ -49,18 +56,15 @@ CSV.open('xero.csv', 'wb', row_sep: "\r\n") do |csv|
   charges.each do |charge|
     if charge.paid && !charge.refunded
       date = xero_date charge.created
-      description = "Payment from #{charge.customer}"
-      amount = cents_to_dollars charge.amount
+      description = "Payment from #{charge.customer.email}"
+      amount = cents_to_dollars charge.amount - charge.amount_refunded
       reference = charge.id
       type = "Credit"
-      customer = Stripe::Customer.retrieve(charge.customer)
-      payee = customer.email if customer.respond_to? :email
+      payee = charge.customer.email if charge.customer.respond_to? :email
       
       csv << [date,description,amount,reference,type,payee] if payee
     end
   end
-  p transfers.first
-  p charges.first
 
   # CSV.foreach 'payments.csv', headers: true do |row|
   #   if row[" Status"] == "Paid"
@@ -68,3 +72,5 @@ CSV.open('xero.csv', 'wb', row_sep: "\r\n") do |csv|
   #   end
   # end
 end
+puts "complete!"
+#puts "complete! Oldest charge: #{DateTime.strptime(charges.last.created.to_s,'%s')}"
