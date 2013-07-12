@@ -37,18 +37,17 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   csv << ['Transaction Date','Description', 'Transaction Amount', 'Reference', 'Transaction Type', 'Payee']
   transfers.each do |transfer|
     if transfer.status == "paid"
-    
       date = xero_date transfer.date
       description = "Transfer from Stripe"
       amount = -(cents_to_dollars transfer.amount)
       reference = transfer.id
       type = "Transfer"
       payee = bank_name
-      fees = -(cents_to_dollars transfer.summary.charge_fees)
+      fees = -(cents_to_dollars(transfer.summary.charge_fees + transfer.summary.refund_fees))
       description2 = "Stripe fees"
       type2 = "Debit"
       payee2 = "Stripe"
-      
+
       csv << [date,description,amount,reference,type,payee]
       csv << [date,description2,fees,reference,type2,payee2]
     end
@@ -61,16 +60,10 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       reference = charge.id
       type = "Credit"
       payee = charge.customer.email if charge.customer.respond_to? :email
-      
+
       csv << [date,description,amount,reference,type,payee] if payee
     end
   end
-
-  # CSV.foreach 'payments.csv', headers: true do |row|
-  #   if row[" Status"] == "Paid"
-  #     csv << [row[" Time"].gsub(/\ \d\d:\d\d/,''), "Payment from #{row[" Customer email"]}", row[" Amount"], row['Id'], 'Credit', row[' Customer email']]
-  #   end
-  # end
 end
 puts "complete!"
 #puts "complete! Oldest charge: #{DateTime.strptime(charges.last.created.to_s,'%s')}"
