@@ -55,7 +55,15 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   charges.each do |charge|
     if charge.paid && !charge.refunded
       date = xero_date charge.created
-      description = "Payment from #{charge.customer.email}"
+      if charge.customer
+        if charge.customer.respond_to? :deleted
+          description = "Payment from deleted customer id: #{charge.customer.id}"
+        else
+          description = "Payment from #{charge.customer.email}"
+        end
+      else
+        description = "Payment from nil customer"
+      end
       amount = cents_to_dollars charge.amount - charge.amount_refunded
       reference = charge.id
       type = "Credit"
