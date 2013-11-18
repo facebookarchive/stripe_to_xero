@@ -59,7 +59,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
         if charge.customer.respond_to? :deleted
           description = "Payment from deleted customer id: #{charge.customer.id}"
         else
-          description = "Payment from #{charge.customer.email}"
+          description = "Payment from #{charge.customer.description || charge.customer.email}"
         end
       else
         description = "Payment from nil customer"
