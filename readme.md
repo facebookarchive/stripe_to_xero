@@ -14,19 +14,17 @@ Use these environment variables as configuration
     BANK_NAME="the name of your transfer bank"
     STX_COUNT=50 #optional, but recommended
 
-Be sure to `bundle install` to install the `stripe` gem. You should also install `casperjs` with `npm install -g casperjs` if you'd like to use the `auto_import.sh` script.
-
 # Dependencies
 
 - `stripe` gem
+- `mechanize` gem (We use this to import bank statements given Xero doesn't have an api for importing them.)
 
 # Recommended tools
-- `casperjs` npm module (`casper.coffee` automagically uploads the bank statement into Xero, even though Xero doesn't provide an API.)
 - `foreman` (recommended for easily running the script with environment variables)
 
 # Usage
 
-- Run `auto_import.sh` to automatically import your Stripe data into Xero. (If you have `casperjs` installed)
+- Run `auto_import.sh` to automatically import your Stripe data into Xero.
 - Or, just run the `stripe_to_xero.rb` script to generate `xero.csv` which you can upload manually.
 - Reconcile away.
 
@@ -38,11 +36,13 @@ Requires ruby 1.9.
 
 # Changelog
 
+v2 - Move from casper to mechanize, making it easier to deploy on Heroku.
+
 v1 - Implements new refund calculation, adds better echoed text, uses Stripe's newish `expand` option to make 50 less API calls, and increase speed A LOT.
 
 # License
 
-Copyright (c) 2013, Vidpresso, Inc.
+Copyright (c) 2014, Vidpresso, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

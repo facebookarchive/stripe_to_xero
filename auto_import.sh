@@ -1,6 +1,6 @@
 #!/bin/bash
 
 ruby stripe_to_xero.rb
-casperjs casper.coffee
+ruby mechanize.rb
 rm xero.csv
 echo "successfully imported stripe to xero"
