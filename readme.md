@@ -14,8 +14,9 @@ Use these environment variables as configuration
     BANK_NAME="the name of your transfer bank"
     STX_COUNT=50 #optional, but recommended
 
-# Dependencies
+# Installation/Dependencies
 
+Dependencies can be installed using bundler. Run `bundle install` in the repository root 
 - `stripe` gem
 - `mechanize` gem (We use this to import bank statements given Xero doesn't have an api for importing them.)
 
@@ -26,6 +27,7 @@ Use these environment variables as configuration
 
 - Run `auto_import.sh` to automatically import your Stripe data into Xero.
 - Or, just run the `stripe_to_xero.rb` script to generate `xero.csv` which you can upload manually.
+- You can also specify a from date to `stripe_to_xero.rb` in the format of `stripe_to_xero.rb --date 03/03/2014`
 - Reconcile away.
 
 # Notes
