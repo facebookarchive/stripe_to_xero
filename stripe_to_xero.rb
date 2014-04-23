@@ -43,9 +43,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       reference = transfer.id
       type = "Transfer"
       payee = bank_name
-      if(defined? transfer.fee)
-        fees = -(cents_to_dollars(transfer.fee))
-      elsif(defined? transfer.summary.charge_fees)
+      if(defined? transfer.summary.charge_fees)
         fees = -(cents_to_dollars(transfer.summary.charge_fees))
       end
       description2 = "Stripe fees"
@@ -68,17 +66,19 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       else
         description = "Payment from nil customer"
       end
+
       amount = cents_to_dollars charge.amount - charge.amount_refunded
       reference = charge.id
       type = "Credit"
-      
+      payee = ""
+
       if charge.customer.respond_to? :email
         payee = charge.customer.email
       else
         payee = charge.card.name
       end
 
-      csv << [date,description,amount,reference,type,payee] if payee
+      csv << [date,description,amount,reference,type,payee]
     end
   end
 end
