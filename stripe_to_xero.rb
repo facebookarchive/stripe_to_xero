@@ -4,19 +4,6 @@ require 'csv'
 require 'date'
 require 'stripe'
 
-Stripe.api_key = ENV['STRIPE_SECRET']
-#Stripe.api_key = '' #Put your secret here and comment the line above if you're not sure about env vars.
-bank_name = ENV['BANK_NAME'] || "US Bank"
-count = ENV['STX_COUNT'] || 50
-output_file = 'xero.csv'
-
-puts "gathering last #{count} charges"
-charges = Stripe::Charge.all(count: count, :expand => ['data.customer'])
-puts "done!"
-puts "gathering last #{count} transfers"
-transfers = Stripe::Transfer.all(count: count)
-puts "done"
-
 def cents_to_dollars(value)
   if value != 0
     val = value.to_s[0..-3] + "." + value.to_s[-2..-1]
@@ -32,6 +19,20 @@ def xero_date(date_obj)
   end
   date = "#{date_obj.year}-#{"%02d" % date_obj.month}-#{"%02d" % date_obj.day}"
 end
+
+Stripe.api_key = ENV['STRIPE_SECRET']
+#Stripe.api_key = '' #Put your secret here and comment the line above if you're not sure about env vars.
+bank_name = ENV['BANK_NAME'] || "US Bank"
+count = ENV['STX_COUNT'] || 50
+output_file = 'xero.csv'
+
+puts "gathering last #{count} charges"
+charges = Stripe::Charge.all(count: count, :expand => ['data.customer'])
+puts "done!"
+puts "gathering last #{count} transfers"
+transfers = Stripe::Transfer.all(count: count)
+puts "done"
+
 puts "Writing xero.csv"
 CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   csv << ['Transaction Date','Description', 'Transaction Amount', 'Reference', 'Transaction Type', 'Payee']
@@ -55,7 +56,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
     end
   end
   charges.each do |charge|
-    if charge.paid && !charge.refunded
+    if charge.paid
       date = xero_date charge.created
       if charge.customer
         if charge.customer.respond_to? :deleted
@@ -67,9 +68,44 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
         description = "Payment from nil customer"
       end
 
-      amount = cents_to_dollars charge.amount - charge.amount_refunded
+      amount = cents_to_dollars charge.amount
       reference = charge.id
       type = "Credit"
+      payee = ""
+
+      if charge.customer.respond_to? :email
+        payee = charge.customer.email
+      else
+        payee = charge.card.name
+      end
+
+      csv << [date,description,amount,reference,type,payee]
+    end
+    if charge.respond_to? :refunds
+      charge.refunds.each do |refund|
+        date = xero_date refund.created
+        description = "refund for #{charge.customer.description || charge.customer.email}"
+        amount = -(cents_to_dollars refund.amount)
+        reference = refund.balance_transaction
+        type = "Debit"
+        #payee = payee from above
+        csv << [date, description, amount, reference, type, payee]
+      end
+    elsif charge.refunded
+      date = xero_date charge.created
+      if charge.customer
+        if charge.customer.respond_to? :deleted
+          description = "Refund from deleted customer id: #{charge.customer.id}"
+        else
+          description = "Refund from #{charge.customer.description || charge.customer.email}"
+        end
+      else
+        description = "Payment from nil customer"
+      end
+
+      amount = cents_to_dollars charge.amount_refunded
+      reference = charge.id
+      type = "Debit"
       payee = ""
 
       if charge.customer.respond_to? :email
