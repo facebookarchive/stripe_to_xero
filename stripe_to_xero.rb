@@ -85,7 +85,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       charge.refunds.each do |refund|
         date = xero_date refund.created
         description = "refund for #{charge.customer.description || charge.customer.email}"
-        amount = -(cents_to_dollars refund.amount)
+        amount = (cents_to_dollars refund.amount)
         reference = refund.balance_transaction
         type = "Debit"
         #payee = payee from above
