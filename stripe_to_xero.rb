@@ -84,7 +84,11 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
     if charge.respond_to? :refunds
       charge.refunds.each do |refund|
         date = xero_date refund.created
-        description = "refund for #{charge.customer.description || charge.customer.email}"
+        if charge.customer
+          description = "refund for #{charge.customer.description || charge.customer.email}"
+        else
+          description = "Payment from nil customer"
+        end
         amount = (cents_to_dollars refund.amount)
         reference = refund.balance_transaction
         type = "Debit"
