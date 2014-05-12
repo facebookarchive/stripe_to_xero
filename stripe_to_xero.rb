@@ -40,19 +40,21 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
     if transfer.status == "paid"
       date = xero_date transfer.date
       description = "Transfer from Stripe"
-      amount = -(cents_to_dollars transfer.amount)
+      amount = -cents_to_dollars(transfer.amount)
       reference = transfer.id
       type = "Transfer"
       payee = bank_name
-      if(defined? transfer.summary.charge_fees)
-        fees = -(cents_to_dollars(transfer.summary.charge_fees - transfer.summary.adjustment_gross))
-      end
+      fees = - cents_to_dollars(transfer.summary.charge_fees + transfer.summary.refund_fees)
+      fee_adjustment = cents_to_dollars(transfer.summary.adjustment_gross - transfer.summary.adjustment_fees)
       description2 = "Stripe fees"
       type2 = "Debit"
       payee2 = "Stripe"
 
       csv << [date,description,amount,reference,type,payee]
       csv << [date,description2,fees,reference,type2,payee2]
+      if fee_adjustment != 0
+        csv << [date, 'Stripe fee adjustment', fee_adjustment, reference, "credit", "Stripe"]
+      end
     end
   end
   charges.each do |charge|
