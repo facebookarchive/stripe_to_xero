@@ -61,25 +61,20 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
     if charge.paid
       date = xero_date charge.created
       if charge.customer
+        payee = charge.customer.id
         if charge.customer.respond_to? :deleted
           description = "Payment from deleted customer id: #{charge.customer.id}"
         else
-          description = "Payment from #{charge.customer.description || charge.customer.email}"
+          description = "Payment from #{charge.customer.description} / #{charge.customer.email}"
         end
       else
         description = "Payment from nil customer"
+        payee = "Nil customer"
       end
 
       amount = cents_to_dollars charge.amount
       reference = charge.id
       type = "Credit"
-      payee = ""
-
-      if charge.customer.respond_to? :email
-        payee = charge.customer.email
-      else
-        payee = charge.card.name
-      end
 
       csv << [date,description,amount,reference,type,payee]
     end
@@ -87,11 +82,15 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       charge.refunds.each do |refund|
         date = xero_date refund.created
         if charge.customer
-          description = "refund for #{charge.customer.description || charge.customer.email}"
+          if charge.customer.respond_to? :deleted
+          description = "Refund from deleted customer id: #{charge.customer.id}"
+        else
+          description = "Refund from #{charge.customer.description} / #{charge.customer.email}"
+        end
         else
           description = "Refund from nil customer"
         end
-        amount = (cents_to_dollars refund.amount)
+        amount = -(cents_to_dollars refund.amount)
         reference = refund.balance_transaction
         type = "Debit"
         #payee = payee from above
@@ -103,7 +102,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
         if charge.customer.respond_to? :deleted
           description = "Refund from deleted customer id: #{charge.customer.id}"
         else
-          description = "Refund from #{charge.customer.description || charge.customer.email}"
+          description = "Refund from #{charge.customer.description} / #{charge.customer.email}"
         end
       else
         description = "Payment from nil customer"
@@ -112,13 +111,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       amount = - cents_to_dollars(charge.amount_refunded)
       reference = charge.id
       type = "Debit"
-      payee = ""
-
-      if charge.customer.respond_to? :email
-        payee = charge.customer.email
-      else
-        payee = charge.card.name
-      end
+      payee = charge.customer.id
 
       csv << [date,description,amount,reference,type,payee]
     end

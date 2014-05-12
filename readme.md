@@ -36,6 +36,8 @@ Requires ruby 1.9.
 
 # Changelog
 
+v3 - Fix refund issues, change payee from email / description to stripe ID since those other values change and screw up past matching.
+
 v2 - Move from casper to mechanize, making it easier to deploy on Heroku.
 
 v1 - Implements new refund calculation, adds better echoed text, uses Stripe's newish `expand` option to make 50 less API calls, and increase speed A LOT.
