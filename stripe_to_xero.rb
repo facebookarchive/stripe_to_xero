@@ -33,6 +33,27 @@ puts "gathering last #{count} transfers"
 transfers = Stripe::Transfer.all(count: count)
 puts "done"
 
+def process_refunds(charge, csv)
+  if charge.amount_refunded > 0
+    date = xero_date charge.created
+    if charge.customer
+      payee = charge.customer.id
+      if charge.customer.respond_to? :deleted
+        description = "Refund from deleted customer id: #{charge.customer.id}"
+      else
+        description = "Refund from #{charge.customer.description} / #{charge.customer.email}"
+      end
+    else
+      payee = "nil customer"
+      description = "Refund from nil customer"
+    end
+    amount = -(cents_to_dollars charge.amount_refunded)
+    reference = charge.balance_transaction
+    type = "Debit"
+    csv << [date, description, amount, reference, type, payee]
+  end
+end
+
 puts "Writing xero.csv"
 CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   csv << ['Transaction Date','Description', 'Transaction Amount', 'Reference', 'Transaction Type', 'Payee']
@@ -78,43 +99,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
 
       csv << [date,description,amount,reference,type,payee]
     end
-    if charge.respond_to? :refunds
-      charge.refunds.each do |refund|
-        date = xero_date refund.created
-        if charge.customer
-          if charge.customer.respond_to? :deleted
-          description = "Refund from deleted customer id: #{charge.customer.id}"
-        else
-          description = "Refund from #{charge.customer.description} / #{charge.customer.email}"
-        end
-        else
-          description = "Refund from nil customer"
-        end
-        amount = -(cents_to_dollars refund.amount)
-        reference = refund.balance_transaction
-        type = "Debit"
-        #payee = payee from above
-        csv << [date, description, amount, reference, type, payee]
-      end
-    elsif charge.refunded
-      date = xero_date charge.created
-      if charge.customer
-        if charge.customer.respond_to? :deleted
-          description = "Refund from deleted customer id: #{charge.customer.id}"
-        else
-          description = "Refund from #{charge.customer.description} / #{charge.customer.email}"
-        end
-      else
-        description = "Payment from nil customer"
-      end
-
-      amount = - cents_to_dollars(charge.amount_refunded)
-      reference = charge.id
-      type = "Debit"
-      payee = charge.customer.id
-
-      csv << [date,description,amount,reference,type,payee]
-    end
+    process_refunds(charge, csv)
   end
 end
 puts "complete!"
