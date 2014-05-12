@@ -45,7 +45,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       type = "Transfer"
       payee = bank_name
       if(defined? transfer.summary.charge_fees)
-        fees = -(cents_to_dollars(transfer.summary.charge_fees))
+        fees = -(cents_to_dollars(transfer.summary.charge_fees - transfer.summary.adjustment_gross))
       end
       description2 = "Stripe fees"
       type2 = "Debit"
